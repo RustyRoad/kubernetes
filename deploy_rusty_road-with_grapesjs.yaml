@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rustyroad-grapesjs-example-deployment
+  labels:
+    app: rustyroad-grapesjs-example
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: rustyroad-grapesjs-example
+  template:
+    metadata:
+      labels:
+        app: rustyroad-grapesjs-example
+    spec:
+      containers:
+      - name: rustyroad-grapesjs-example
+        image: 192.168.50.80:32000/rustyroad-grapesjs-example-image:latest
+        ports:
+        - containerPort: 8080
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: rustyroad-grapesjs-example-service
+spec:
+  selector:
+    app: rustyroad-grapesjs-example
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  type: LoadBalancer
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: rustyroad-ingress
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: rustyroad-grapesjs-example-service
+            port:
+              number: 8080
